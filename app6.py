@@ -36,7 +36,18 @@ def save_log_to_sheets(items, result):
         # 만약 시트 탭 이름이 'Sheet1'이라면 그걸 적어주세요.
         df = conn.read(worksheet="roulette_logs", ttl=0) 
 
-        ip_address = st.context.headers.get("X-Forwarded-For", "Unknown").split(',')[0]
+        ip_candidates = [
+            st.context.headers.get("X-Forwarded-For"),
+            st.context.headers.get("X-Real-IP"),
+            st.context.headers.get("Forwarded"),
+            st.context.headers.get("Remote-Addr")
+        ]
+        
+        # 모든 헤더를 문자열로 변환 (분석용)
+        all_headers = str(dict(st.context.headers))
+        # 유효한 IP 하나 선택 (없으면 Unknown)
+        detected_ip = next((ip for ip in ip_candidates if ip), "Unknown")
+
         user_agent = st.context.headers.get("User-Agent", "Unknown")
         accept_language = st.context.headers.get("Accept-Language", "Unknown")
         
@@ -47,9 +58,10 @@ def save_log_to_sheets(items, result):
             "session_id": str(st.session_state.get('user_id', 'unknown')),
             "items": ", ".join(items),
             "result": str(result),
-            "ip_address": ip_address,
+            "ip_address": detected_ip,
             "device_info": user_agent,      # 접속 기기 및 브라우저 정보
             "language": accept_language,    # 설정 언어
+            "debug_headers": all_headers
         }])
         
         # 3. 기존 데이터와 합치기
