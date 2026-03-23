@@ -32,23 +32,32 @@ conn = st.connection("gsheets", type=GSheetsConnection)
 
 def save_log_to_sheets(items, result):
     try:
-        # Secrets에 등록된 스프레드시트를 읽어옴
-        df = conn.read() 
+        # 1. 시트 읽기 (워크시트 이름을 명시하는 것이 가장 확실합니다)
+        # 만약 시트 탭 이름이 'Sheet1'이라면 그걸 적어주세요.
+        df = conn.read(worksheet="roulette_logs") 
         
-        # 새 로그 생성
-        new_data = pd.DataFrame([{
+        # 2. 새 로그 데이터프레임 생성
+        # 리스트 형태인 items를 문자열로 변환하여 저장합니다.
+        new_row = pd.DataFrame([{
             "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "session_id": st.session_state.user_id,
+            "session_id": str(st.session_state.get('user_id', 'unknown')),
             "items": ", ".join(items),
-            "result": result
+            "result": str(result)
         }])
         
-        # 데이터 합치기 및 업데이트 (시트의 첫 번째 워크시트에 반영)
-        updated_df = pd.concat([df, new_data], ignore_index=True)
+        # 3. 기존 데이터와 합치기
+        # 기존 시트가 비어있을 경우를 대비해 빈 데이터프레임 처리를 포함합니다.
+        if df is not None and not df.empty:
+            updated_df = pd.concat([df, new_row], ignore_index=True)
+        else:
+            updated_df = new_row
+            
+        # 4. 업데이트 실행
         conn.update(worksheet="roulette_logs", data=updated_df)
+        
     except Exception as e:
-        # 사용자에게는 조용히, 로그에는 남기기
-        print(f"Logging Error: {e}")
+        # 에러 발생 시 로그에 상세 내용을 찍습니다. (Streamlit Cloud 로그에서 확인 가능)
+        print(f"Logging Error 상세: {e}")
 
 
 # 2. 룰렛 이미지 생성 함수 (12시 방향 기준)
