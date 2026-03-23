@@ -35,6 +35,9 @@ def save_log_to_sheets(items, result):
         # 1. 시트 읽기 (워크시트 이름을 명시하는 것이 가장 확실합니다)
         # 만약 시트 탭 이름이 'Sheet1'이라면 그걸 적어주세요.
         df = conn.read(worksheet="roulette_logs", ttl=0) 
+
+        user_agent = st.context.headers.get("User-Agent", "Unknown")
+        accept_language = st.context.headers.get("Accept-Language", "Unknown")
         
         # 2. 새 로그 데이터프레임 생성
         # 리스트 형태인 items를 문자열로 변환하여 저장합니다.
@@ -42,7 +45,9 @@ def save_log_to_sheets(items, result):
             "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "session_id": str(st.session_state.get('user_id', 'unknown')),
             "items": ", ".join(items),
-            "result": str(result)
+            "result": str(result),
+            "device_info": user_agent,      # 접속 기기 및 브라우저 정보
+            "language": accept_language,    # 설정 언어
         }])
         
         # 3. 기존 데이터와 합치기
