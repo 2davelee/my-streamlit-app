@@ -8,6 +8,7 @@ import base64
 from io import BytesIO
 import random
 import os
+import pytz
 from streamlit_gsheets import GSheetsConnection
 from PIL import Image, ImageDraw, ImageFont
 import streamlit.components.v1 as components
@@ -24,6 +25,9 @@ if 'target_angle' not in st.session_state:
     st.session_state.target_angle = 0
 if 'is_spinning' not in st.session_state:
     st.session_state.is_spinning = False
+if 'user_id' not in st.session_state:
+    # uuid를 사용해 중복되지 않는 고유 ID 생성
+    st.session_state.user_id = str(uuid.uuid4())[:8] # 앞 8자리만 사용
 
 # 1-1. 세션 식별자 (유지)
 if 'user_real_ip' not in st.session_state:
@@ -52,11 +56,15 @@ def save_log_to_sheets(items, result, current_ip):
         all_headers = str(dict(st.context.headers))
         user_agent = st.context.headers.get("User-Agent", "Unknown")
         accept_language = st.context.headers.get("Accept-Language", "Unknown")
+
+        # 한국 시간대 설정
+        KST = pytz.timezone('Asia/Seoul')
+        now_kst = datetime.datetime.now(KST) # 서버 시간이 아닌 한국 시간으로 가져오기
  
         # 2. 새 로그 데이터프레임 생성
         # 리스트 형태인 items를 문자열로 변환하여 저장합니다.
         new_row = pd.DataFrame([{
-            "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "timestamp": now_kst.strftime("%Y-%m-%d %H:%M:%S"),
             "session_id": str(st.session_state.get('user_id', 'unknown')),
             "items": ", ".join(items),
             "result": str(result),
