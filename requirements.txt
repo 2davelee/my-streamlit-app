@@ -8,3 +8,7 @@ st-gsheets-connection
 pandas
 requests
 streamlit-js-eval
+seaborn
+matplotlib
+scipy
+pytz

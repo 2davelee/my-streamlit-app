@@ -8,7 +8,6 @@ import base64
 from io import BytesIO
 import random
 import os
-import pytz
 import plotly.express as px
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -17,6 +16,7 @@ from PIL import Image, ImageDraw, ImageFont
 import streamlit.components.v1 as components
 from streamlit_js_eval import streamlit_js_eval
 import requests
+import pytz
 
 # 1. 페이지 및 세션 상태 설정
 st.set_page_config(page_title="진짜 도는 런치룰렛", layout="centered")
