@@ -9,11 +9,14 @@ from io import BytesIO
 import random
 import os
 import pytz
+import plotly.express as px
+import seaborn as sns
+import matplotlib.pyplot as plt
 from streamlit_gsheets import GSheetsConnection
 from PIL import Image, ImageDraw, ImageFont
 import streamlit.components.v1 as components
 from streamlit_js_eval import streamlit_js_eval
-
+import requests
 
 
 # 1. 페이지 및 세션 상태 설정
@@ -44,6 +47,7 @@ real_ip = streamlit_js_eval(
     js_expressions='fetch("https://api.ipify.org?format=json").then(response => response.json()).then(data => data.ip)',
     key='ip_address'
 )
+
 
 def save_log_to_sheets(items, result, current_ip):
     try:
@@ -245,3 +249,156 @@ if st.session_state.is_spinning:
     st.balloons()
     time.sleep(1.0)
     st.rerun()
+
+
+# --- [관리자 전용 대시보드 함수] ---
+def get_location_from_ip(ip):
+    try:
+        response = requests.get(f"http://ip-api.com/json/{ip}").json()
+        if response['status'] == 'success':
+            return response['lat'], response['lon'], response['city']
+    except:
+        return None, None, None
+
+# 1. URL 파라미터 확인 (은닉용)
+query_params = st.query_params
+
+# 주소창에 ?view=manage 가 있을 때만 관리자 로직 작동
+if query_params.get("view") == "manage":
+    
+    # 2. 사이드바에 비밀번호 입력창 생성
+    with st.sidebar:
+        st.divider()
+        st.subheader("🔑 Admin Access")
+        # secrets.toml의 ADMIN_PASSWORD와 비교
+        admin_pw = st.text_input("비밀번호를 입력하세요", type="password", key="admin_pwd_input")
+
+    # 3. 비밀번호가 일치할 때만 메인 화면 하단에 대시보드 렌더링
+    if admin_pw == st.secrets.get("ADMIN_PASSWORD"):
+        st.divider() # 룰렛과 대시보드 구분선
+        st.success("🔓 관리자 모드 활성화!")
+        st.title("📊 전체 접속 로그 분석 (David Only)")
+        
+        try:
+            # 실시간 로그 읽기
+            log_df = conn.read(worksheet="roulette_logs", ttl=0)
+            
+            if log_df is not None and not log_df.empty:
+                # 요약 지표
+                total_hits = len(log_df)
+                unique_users = log_df['ip_address'].nunique()
+                
+                m_col1, m_col2 = st.columns(2)
+                m_col1.metric("총 실행 횟수", f"{total_hits}회")
+                m_col2.metric("고유 사용자(IP)", f"{unique_users}명")
+                
+                # 검색 및 필터링
+                st.divider()
+                search_query = st.text_input("IP 또는 결과 검색", "", key="log_search")
+                if search_query:
+                    filtered_df = log_df[log_df.astype(str).apply(lambda x: x.str.contains(search_query, case=False)).any(axis=1)]
+                else:
+                    filtered_df = log_df
+
+                # 로그 테이블 (최신순)
+                st.dataframe(filtered_df.sort_index(ascending=False), use_container_width=True)
+                
+                # 통계 차트
+                st.subheader("🍕 인기 당첨 메뉴 TOP 5")
+                menu_counts = log_df['result'].value_counts().head(5).to_frame()
+                st.bar_chart(menu_counts)
+
+                st.subheader("🌍 사용자 지역 분포")
+
+                #IP 기반 지역 분석 (Geographic Analysis)
+                locations = []
+                for ip in log_df['ip_address'].unique():
+                    # 1. 일단 결과를 통째로 받습니다.
+                    result = get_location_from_ip(ip)
+                    
+                    # 2. 결과가 None이 아닐 때만 짐을 풉니다.
+                    if result is not None:
+                        lat, lon, city = result
+                        if lat: # 위도 정보가 있는 경우에만 추가
+                            locations.append({'lat': lat, 'lon': lon, 'city': city})
+                    else:
+                        # 결과가 None인 경우(로그 확인용)
+                        print(f"IP {ip}의 위치 정보를 찾을 수 없습니다.")
+
+                if locations:
+                    map_df = pd.DataFrame(locations)
+                    st.map(map_df)
+                    st.write(f"주요 접속 도시: {', '.join(map_df['city'].unique())}")
+
+                #요일-시간대별 방문자 수 히트맵
+                def draw_activity_heatmap(df):
+                    # 1. 시간 데이터 전처리 (timestamp 컬럼이 있다고 가정)
+                    df['timestamp'] = pd.to_datetime(df['timestamp'])
+                    df['hour'] = df['timestamp'].dt.hour
+                    df['day_of_week'] = df['timestamp'].dt.day_name()
+                    
+                    # 요일 순서 정렬 (월~일)
+                    days_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+                    
+                    # 2. 요일/시간별로 그룹화하여 카운트 계산
+                    heatmap_data = df.groupby(['day_of_week', 'hour']).size().reset_index(name='counts')
+                    
+                    # 데이터 피벗 (히트맵 형식으로 변환)
+                    heatmap_pivot = heatmap_data.pivot(index='day_of_week', columns='hour', values='counts')
+                    heatmap_pivot = heatmap_pivot.reindex(days_order) # 요일 순서 맞추기
+                    heatmap_pivot = heatmap_pivot.fillna(0) # 데이터 없는 시간은 0으로 채움
+
+                    # 3. Plotly 히트맵 생성
+                    fig = px.imshow(
+                        heatmap_pivot,
+                        labels=dict(x="Hour of Day (24h)", y="Day of Week", color="Access Count"),
+                        x=heatmap_pivot.columns,
+                        y=heatmap_pivot.index,
+                        color_continuous_scale='Viridis', # 색상 테마 (YlGnBu, Viridis 등)
+                        aspect="auto"
+                    )
+
+                    fig.update_xaxes(side="bottom", dtick=1) # x축 간격 조절
+                    
+                    st.subheader("📅 시간대별 사용자 활동 패턴")
+                    st.plotly_chart(fig, use_container_width=True)
+                # 실행 예시 (log_df가 정의되어 있어야 함)
+                draw_activity_heatmap(log_df)
+
+                #코호트 분석
+                def run_ip_cohort_analysis(df):
+                    df['timestamp'] = pd.to_datetime(df['timestamp'])
+                    
+                    # 분석 단위: 'D'(일 단위)가 데이터가 적을 때 패턴 보기 좋습니다.
+                    unit = 'D' 
+                    df['order_period'] = df['timestamp'].dt.to_period(unit).dt.start_time
+                    
+                    # IP별 첫 방문일 찾기
+                    df['cohort_raw'] = df.groupby('ip_address')['timestamp'].transform('min').dt.to_period(unit).dt.start_time
+                    
+                    # 첫 방문일로부터 경과일 계산
+                    df['period_number'] = (df['order_period'] - df['cohort_raw']).dt.days
+
+                    df['cohort'] = df['cohort_raw'].dt.strftime('%Y-%m-%d')
+                    
+                    # 코호트 집계
+                    cohort_pivot = df.groupby(['cohort', 'period_number'])['ip_address'].nunique().reset_index()
+                    cohort_pivot = cohort_pivot.pivot(index='cohort', columns='period_number', values='ip_address')
+                    
+                    # 유지율 계산
+                    retention = cohort_pivot.divide(cohort_pivot.iloc[:, 0], axis=0)
+                    
+                    # 시각화
+                    st.subheader("🌐 IP 기반 사용자 재방문율 (Daily)")
+                    fig, ax = plt.subplots(figsize=(10, 7))
+                    sns.heatmap(retention, annot=True, fmt='.0%', cmap='YlGnBu', ax=ax)
+                    st.pyplot(fig)
+                run_ip_cohort_analysis(log_df)
+            else:
+                st.info("아직 쌓인 로그 데이터가 없습니다.")
+                
+        except Exception as e:
+            st.error(f"데이터 로드 중 오류: {e}")
+            
+    elif admin_pw: # 비번 틀렸을 때만 사이드바에 에러 표시
+        st.sidebar.error("비밀번호가 일치하지 않습니다.")
