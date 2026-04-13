@@ -17,9 +17,9 @@ Language:
 
 Framework:
 
-Design:  (Bezier-Curve Animation)
+Design: (Bezier-Curve Animation)
 
-Environment:  /
+Environment: MS
 
 🚀 시작하기 (Installation)
 저장소 복제
