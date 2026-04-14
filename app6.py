@@ -361,7 +361,7 @@ if st.session_state.is_spinning:
     time.sleep(3) # 애니메이션 시간과 동일하게
     st.session_state.is_spinning = False
     st.balloons()
-    time.sleep(0.5)
+    time.sleep(0.1)
     st.rerun()
 
 
