@@ -275,8 +275,8 @@ if st.session_state.winner and not st.session_state.is_spinning:
                     el.scrollIntoView({{behavior: "smooth", block: "center"}});
                 }}
             }}
-            // 페이지 렌더링 후 약간의 시차를 두고 실행
-            setTimeout(scrollToResult, 400);
+            // 페이지 렌더링 후 약간의 시차를 두고 실행 
+            setTimeout(scrollToResult, 100);
         </script>
         """,
         height=0,
