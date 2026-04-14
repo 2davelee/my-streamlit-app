@@ -1,5 +1,5 @@
-🎡 Real-Spinning Lunch Roulette: Decision-Making & Analytics Platform
-🍱 단순한 선택을 넘어 데이터로 점심 문화를 분석하는 지능형 대시보드
+# Real-Spinning Lunch Roulette: Decision-Making & Analytics Platform
+🍱 쉽고 재밌는 선택 경험을 제공홤과 더불어 유저 데이터로 점심 문화를 분석하는 지능형 대시보드
 - 본 프로젝트는 CSS Bezier-Curve 기반의 물리 엔진 모사와 실시간 유저 행동 데이터 분석 시스템을 결합한 통합 솔루션입니다.
 
 🛠️ Logic & Tech Stack
@@ -26,7 +26,7 @@
 - Retention Dashboard: * Daily Cohort: 신규 방문자 대비 재방문자의 비율을 히트맵 형식으로 산출.
 - Popularity Analytics: 당첨 빈도 상위 메뉴 데이터 시각화로 점심 트렌드 파악.
 
-💡 Dev Log: High-Level Engineering
+# Dev Log: High-Level Engineering
 🔒 Stealth & Security
 - 일반 사용자에게 노출되지 않는 관리자 모드를 구현하기 위해 URL Query Parameter 제어 로직을 적용했습니다. 이는 불필요한 리소스 노출을 막고, 관리자 전용 대시보드가 실제 서비스 성능에 영향을 주지 않도록 설계되었습니다.
 
@@ -40,11 +40,10 @@
 - Focus: 재미기반 사용자의 효율적인 의사결정 프로세스 및 유저 데이터 실시간 대쉬보드 자동화 시스템 구현.
 - Philosophy: "데이터는 수집하는 것이 아니라, 가치 있는 통찰로 변환될 때 의미를 갖는다."
 
-🚀 Quick Start
-Bash
-# 1. 저장소 복제 및 라이브러리 설치
+# Quick Start
+1. 저장소 복제 및 라이브러리 설치
 git clone https://github.com/YourName/Lunch-Roulette.git
 pip install -r requirements.txt
 
-# 2. 접근 방법
+2. 접근 방법
 streamlit run app6.py
