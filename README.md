@@ -1,5 +1,5 @@
 # Real-Spinning Lunch Roulette: Decision-Making & Analytics Platform
-🍱 쉽고 재밌는 선택 경험을 제공홤과 더불어 유저 데이터로 점심 문화를 분석하는 지능형 대시보드
+🍱 쉽고 재밌는 선택 경험을 제공함과 더불어 유저 데이터로 점심 문화를 분석하는 지능형 대시보드
 - 본 프로젝트는 CSS Bezier-Curve 기반의 물리 엔진 모사와 실시간 유저 행동 데이터 분석 시스템을 결합한 통합 솔루션입니다.
 
 🛠️ Logic & Tech Stack
