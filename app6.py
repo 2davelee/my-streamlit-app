@@ -117,8 +117,12 @@ def create_roulette(items):
     img = Image.new("RGBA", size, (255, 255, 255, 0))
     draw = ImageDraw.Draw(img)
     
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    local_font_path = os.path.join(current_dir, "NanumGothic.ttf")
+
     # 서버(Linux)와 로컬(Windows) 경로를 모두 대응하도록 수정
     font_paths = [
+        local_font_path,
         "/usr/share/fonts/truetype/nanum/NanumGothic.ttf",  # Streamlit 서버(Linux) 경로
         "C:/Windows/Fonts/malgun.ttf",                     # 윈도우 로컬 경로
         "/System/Library/Fonts/Supplemental/AppleGothic.ttf" # 맥 로컬 경로
