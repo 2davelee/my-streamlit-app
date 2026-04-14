@@ -276,7 +276,7 @@ if st.session_state.winner and not st.session_state.is_spinning:
                 }}
             }}
             // 페이지 렌더링 후 약간의 시차를 두고 실행
-            setTimeout(scrollToResult, 700);
+            setTimeout(scrollToResult, 400);
         </script>
         """,
         height=0,
