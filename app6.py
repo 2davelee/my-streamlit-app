@@ -253,7 +253,6 @@ st.markdown(f"""
 
 # 5. 로직 실행
 if st.session_state.winner and not st.session_state.is_spinning:
-    st.balloons()
     # --- [결과 화면] ---
     placeholder.markdown(f"""
     <div class="roulette-container">
@@ -277,7 +276,7 @@ if st.session_state.winner and not st.session_state.is_spinning:
                 }}
             }}
             // 페이지 렌더링 후 약간의 시차를 두고 실행
-            setTimeout(scrollToResult, 1000);
+            setTimeout(scrollToResult, 700);
         </script>
         """,
         height=0,
@@ -361,8 +360,9 @@ else:
 if st.session_state.is_spinning:
     time.sleep(3) # 애니메이션 시간과 동일하게
     st.session_state.is_spinning = False
+    st.balloons()
+    time.sleep(1.0)
     st.rerun()
-
 
 
 
