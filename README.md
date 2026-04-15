@@ -1,6 +1,7 @@
 # Real-Spinning Lunch Roulette: Decision-Making & Analytics Platform
-🍱 쉽고 재밌는 선택 경험을 제공함과 더불어 유저 데이터로 점심 문화를 분석하는 지능형 대시보드
-- 본 프로젝트는 CSS Bezier-Curve 기반의 물리 엔진 모사와 실시간 유저 행동 데이터 분석 시스템을 결합한 통합 솔루션입니다.
+🍱 우리 뭐 먹지? 진짜 도는 런치룰렛
+- 본 프로젝트는 룰렛 돌리기와 실시간 유저 행동 데이터 분석 시스템을 결합한 통합 솔루션입니다.
+    - 유저들에게는 쉽고 재밌는 선택 경험을 제공, 관리자에겐 수집된 데이터로 또 다른 가치를 제공하는 지능형 대시보드.
 
 🛠️ Logic & Tech Stack
 - Core Logic
@@ -22,7 +23,7 @@
 
 2. Advanced Admin Dashboard (Admin Only)
     - Real-time Log Monitoring: Google Sheets와 연동된 실시간 접속 로그 트래킹 및 검색/필터링 기능.
-    - Activity Heatmap: 요일/시간대별 접속 패턴을 히트맵으로 시각화하여 사용자가 가장 배고픈 골든 타임(Golden Time) 분석.
+    - Activity Heatmap: 요일/시간대별 IP접속 패턴을 히트맵으로 시각화하여 사용자가 가장 배고픈 골든 타임(Golden Time) 분석.
     - Retention Dashboard: * Daily Cohort: 신규 방문자 대비 재방문자의 비율을 히트맵 형식으로 산출.
     - Popularity Analytics: 당첨 빈도 상위 메뉴 데이터 시각화로 점심 트렌드 파악.
 
@@ -37,8 +38,8 @@
 - IP 기반 위치 정보 수집 시 발생할 수 있는 Latency를 최소화하기 위해 비동기 처리 및 예외 처리 로직을 강화하여, 분석 페이지 로딩 속도를 유지하면서도 정확한 지리적 분포도를 구현했습니다.
 
 👨‍💻 Developer: Dave
-- Focus: 재미기반 사용자의 효율적인 의사결정 프로세스 및 유저 데이터 실시간 대쉬보드 자동화 시스템 구현.
-- Philosophy: "데이터는 수집하는 것이 아니라, 가치 있는 통찰로 변환될 때 의미를 갖는다."
+- Focus: 재미기반 유저의 효율적인 의사결정 프로세스 및 유저 데이터 실시간 대쉬보드 구현.
+- Philosophy: "이용 할 수록 데이터가 쌓이고 이는 더 많은 가치 창출에 기여한다."
 
 # Quick Start
 1. 저장소 복제 및 라이브러리 설치
